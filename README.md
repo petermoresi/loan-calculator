@@ -1,4 +1,4 @@
 Simple Loan Calculator
 ======================
 
-A [http://petermoresi.github.io/loan-calculator/loan-calculator.html](simple loan calculator) for the browser; authored in org-mode.
+A [simple loan calculator](http://petermoresi.github.io/loan-calculator/loan-calculator.html) for the browser; authored in org-mode.
