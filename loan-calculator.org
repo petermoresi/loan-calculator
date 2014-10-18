@@ -8,8 +8,6 @@
 
 Loan Calculator is a simple loan calculator for internet browers.
 
-It is intended to be an example of using literate programming to generate dynamic HTML content.
-
 #+BEGIN_HTML
       <div id="user-input" class="row">
         <div class="col-sm-6 ">
@@ -92,9 +90,10 @@ It is intended to be an example of using literate programming to generate dynami
 
     /* TOC inspired by http://jashkenas.github.com/coffee-script */
     #table-of-contents {
+        z-index: 1000;
 	font-size: 10pt;
 	position: fixed;
-	right: 0em;
+	left: 0em;
 	top: 0em;
 	background: white;
 	line-height: 12pt;
@@ -1021,7 +1020,9 @@ content: "*** "
 #+END_HTML
 
 #+BEGIN_HTML
-      <script>
+  <script>
+  (function() {
+
       function pmt(rate,nper,pv) {
           var pvif, pmt;
       
@@ -1030,7 +1031,6 @@ content: "*** "
       
           return pmt;
       };
-      
       function compute_schedule(loan_amount, interest_rate, payments_per_year, years, payment) {
           var schedule = [];
           var remaining = loan_amount;
@@ -1046,17 +1046,18 @@ content: "*** "
       
           return schedule;
       }
+
       
       function getDataSet() { 
           var loan_amount = parseFloat( $('#loan_amount').val() );
           var interest_rate = parseFloat( $('#interest_rate').val() );
           var payments_per_year = parseInt( $('#payments_per_year').val() );
           var years = parseInt( $('#years').val() );
-                                         
+          
           var payment = pmt(interest_rate/100/payments_per_year, payments_per_year * years, -loan_amount);
           
           $('#payment_amount').text('$' + payment.toFixed(2));
-      
+          
           return compute_schedule(loan_amount,
                                   interest_rate,
                                   payments_per_year,
@@ -1084,11 +1085,14 @@ content: "*** "
       
       $(document).ready(function() {
           reloadTable();
-      
+          
           $(document).on('keyup', '.user-input', function(e) {
               reloadTable();
           });
       });
+
+
+  })();
   </script>
 #+END_HTML
 
@@ -1101,35 +1105,28 @@ content: "*** "
   |-----------------------------------------------------------+---------------------------------------------------------------------------------|
   | function name                                             | purpose                                                                         |
   |-----------------------------------------------------------+---------------------------------------------------------------------------------|
-  | [[*Calculate Payment][CalculatePayment]]                  | Calculate the payment per term                                                  |
-  | [[*Calculate Schedule][CalculateSchedule]]                | Computes amortization schedule; returns data table as a multi-dimensional array |
+  | [[*Calculate Payment][pmt]]                               | Calculate the payment per term                                                  |
+  | [[*Calculate Schedule][compute_schedule]]                 | Computes amortization schedule; returns data table as a multi-dimensional array |
   | [[*Read Inputs][ReadInputs]]                              | Queries the values from the HTML inputs and returns the data in a JSObject      |
-  | [[*C][ComputePaymentAndSchedule]ComputePaymentAndSchedule | Calculates the payment and generates the schedule from the inputs               |
-  | DrawTable                                                 | Renders data to visible table                                                   |
   | Anonymous                                                 | Used for hiding variables in function scope and running at startup.             |
   |-----------------------------------------------------------+---------------------------------------------------------------------------------|
 
 ** Calculate Payment
 
-   The function to compute payment amount is named 'pmt'.
-   
-   The function accepts arguments:
-
-   #+NAME: pmt-args
-   |------+-----------------------------------------------------------------------------------------------------------------------|
-   | name | comments                                                                                                              |
-   |------+-----------------------------------------------------------------------------------------------------------------------|
-   | rate | is the interest rate for the loan.                                                                                    |
-   | nper | is the total number of payments for the loan.                                                                         |
-   | pv   | is the present value, or the total amount that a series of future payments is worth now; also known as the principal. |
-   |------+-----------------------------------------------------------------------------------------------------------------------|
-
-*** Source Code 							   
     1. The function signature:
-       #+NAME: define-pmt
-       #+BEGIN_SRC js 
+        #+NAME: define-pmt
+        #+BEGIN_SRC js 
          pmt(rate,nper,pv)
        #+END_SRC
+   
+       #+NAME: pmt-args
+        |------+-----------------------------------------------------------------------------------------------------------------------|
+        | name | comments                                                                                                              |
+        |------+-----------------------------------------------------------------------------------------------------------------------|
+        | rate | is the interest rate for the loan.                                                                                    |
+        | nper | is the total number of payments for the loan.                                                                         |
+        | pv   | is the present value, or the total amount that a series of future payments is worth now; also known as the principal. |
+        |------+-----------------------------------------------------------------------------------------------------------------------|
     2. In order to calculate the payment we need to first calculate the Present Value Interest Factor (PVIF).o
        #+NAME: calculate-pvif
        #+BEGIN_SRC js
@@ -1141,7 +1138,7 @@ content: "*** "
          pmt = rate / (pvif - 1) * -(pv * pvif);
        #+END_SRC
     4. Finally, the sections are combined into a function.
-       #+NAME: pmt-function
+       #+NAME: pmt
        #+BEGIN_SRC js :noweb yes
          function <<define-pmt>> {
              var pvif, pmt;
@@ -1152,131 +1149,27 @@ content: "*** "
              return pmt;
          };
        #+END_SRC
-*** Tests							   
-**** Should be 297.47
-
-    #+NAME: run-pmt
-    #+BEGIN_SRC js :exports results :noweb yes :var interest_rate=4.5 payments_per_year=12 years=3 loan_amount=10000
-      <<pmt-function>>
-      return pmt(interest_rate/100/payments_per_year, payments_per_year * years, -loan_amount).toFixed(2);
-    #+END_SRC
-
-    #+RESULTS: run-pmt
-    : 297.47
-
-**** Should be 2245.22
-
-     #+CALL: run-pmt(interest_rate=3.5, payments_per_year=12, years=30, loan_amount=500000)
-
-     #+RESULTS:
-     : 2245.22
-
-*** Compute Schedule
-**** Overview
-    The function to compute amortization schedule is named 'compute_schedule'.
-
-    The function accepts arguments:
-    
-    #+NAME: compute-schedule-args
-    |-------------------+----------------------------------------------------|
-    | name              | comments                                           |
-    |-------------------+----------------------------------------------------|
-    | loan_amount       | is the amount borrowed to purchase the property.   |
-    | interest_rate     | is the percentage used to calculate interest due.  |
-    | payments_per_year | is the number of payments made in a calendar year. |
-    | years             | is the number of years.                            |
-    | payment           | is the amount of the payment each period.          |
-    |-------------------+----------------------------------------------------|
-**** JavaScript							   
-     1. The function signature is:
-       	#+NAME: define-compute-schedule
-       	#+BEGIN_SRC js
-          compute_schedule(loan_amount, interest_rate, payments_per_year, years, payment)
-       	#+END_SRC
-     2. Define an array to capture the schedule.
-       	#+NAME: define-schedule-array
-       	#+BEGIN_SRC js
-          var schedule = [];
-       	#+END_SRC
-     3. Define a variable to track the remaining balance.
-       	#+NAME: define-remaining-balance
-       	#+BEGIN_SRC js
-          var remaining = loan_amount;
-       	#+END_SRC
-     4. Compute the total number of payments.
-       	#+NAME: compute-number-of-payments
-       	#+BEGIN_SRC js
-          var number_of_payments = payments_per_year * years;
-       	#+END_SRC
-     5. Loop through all of the periods and capture the entries in the schedule.
-       	#+NAME: loop-schedule
-       	#+BEGIN_SRC js
-          for (var i=0; i<=number_of_payments; i++) {
-              var interest = remaining * (interest_rate/100/payments_per_year);
-              var principle = (payment-interest);
-              var row = [i, principle.toFixed(2), interest.toFixed(2), remaining.toFixed(2)];
-              schedule.push(row);
-              remaining -= principle
-          }
-       	#+END_SRC
-     6. Finally, the sections are combined into a function.
-       	#+NAME: compute-schedule-function
-       	#+BEGIN_SRC js :noweb yes
-          function <<define-compute-schedule>> {
-              <<define-schedule-array>>
-              <<define-remaining-balance>>
-              <<compute-number-of-payments>>
-
-              <<loop-schedule>>
-
-              return schedule;
-          }
-       	#+END_SRC
-**** Test								   
-     #+NAME: run-compute-schedule
-     #+BEGIN_SRC js :exports results :results output :noweb yes :var loan_amount=10000 interest_rate=4.5 payments_per_year=12 years=3 payment=297.47
-       <<compute-schedule-function>>
-
-       console.log('loan_amount: ' + loan_amount);
-       console.log('interest_rate: ' + interest_rate);
-       console.log('payments_per_year: ' + payments_per_year);
-       console.log('years: ' + years);
-       console.log('payment: ' + payment);
-       console.log( JSON.stringify(
-           compute_schedule(loan_amount, interest_rate, payments_per_year, years, payment), 0, 4
-       ))
-     #+END_SRC
-
-     #+RESULTS: run-compute-schedule
-     : loan_amount: 10000
-     : interest_rate: 4.5
-     : payments_per_year: 12
-     : years: 3
-     : payment: 297.47
-     : [[0,"259.97","37.50","10000.00"],[1,"260.94","36.53","9740.03"],[2,"261.92","35.55","9479.09"],[3,"262.91","34.56","9217.16"],[4,"263.89","33.58","8954.26"],[5,"264.88","32.59","8690.36"],[6,"265.87","31.60","8425.48"],[7,"266.87","30.60","8159.61"],[8,"267.87","29.60","7892.74"],[9,"268.88","28.59","7624.87"],[10,"269.89","27.58","7355.99"],[11,"270.90","26.57","7086.10"],[12,"271.91","25.56","6815.21"],[13,"272.93","24.54","6543.29"],[14,"273.96","23.51","6270.36"],[15,"274.98","22.49","5996.40"],[16,"276.01","21.46","5721.42"],[17,"277.05","20.42","5445.41"],[18,"278.09","19.38","5168.36"],[19,"279.13","18.34","4890.27"],[20,"280.18","17.29","4611.14"],[21,"281.23","16.24","4330.96"],[22,"282.28","15.19","4049.73"],[23,"283.34","14.13","3767.45"],[24,"284.40","13.07","3484.10"],[25,"285.47","12.00","3199.70"],[26,"286.54","10.93","2914.23"],[27,"287.62","9.85","2627.69"],[28,"288.69","8.78","2340.07"],[29,"289.78","7.69","2051.38"],[30,"290.86","6.61","1761.60"],[31,"291.95","5.52","1470.73"],[32,"293.05","4.42","1178.78"],[33,"294.15","3.32","885.73"],[34,"295.25","2.22","591.58"],[35,"296.36","1.11","296.33"],[36,"297.47","-0.00","-0.03"]]
 
 ** Calculate Schedule
 
    The function to compute amortization schedule is named 'compute_schedule'.
 
-   The function accepts arguments:
-   
-   #+NAME: compute-schedule-args
-   |-------------------+----------------------------------------------------|
-   | name              | comments                                           |
-   |-------------------+----------------------------------------------------|
-   | loan_amount       | is the amount borrowed to purchase the property.   |
-   | interest_rate     | is the percentage used to calculate interest due.  |
-   | payments_per_year | is the number of payments made in a calendar year. |
-   | years             | is the number of years.                            |
-   | payment           | is the amount of the payment each period.          |
-   |-------------------+----------------------------------------------------|
-*** JavaScript							   
     1. The function signature is:
-       #+NAME: define-compute-schedule
-       #+BEGIN_SRC js
-         compute_schedule(loan_amount, interest_rate, payments_per_year, years, payment)
-       #+END_SRC
+        #+NAME: define-compute-schedule
+        #+BEGIN_SRC js
+          compute_schedule(loan_amount, interest_rate, payments_per_year, years, payment)
+        #+END_SRC
+
+        #+NAME: compute-schedule-args
+        |-------------------+----------------------------------------------------|
+        | name              | comments                                           |
+        |-------------------+----------------------------------------------------|
+        | loan_amount       | is the amount borrowed to purchase the property.   |
+        | interest_rate     | is the percentage used to calculate interest due.  |
+        | payments_per_year | is the number of payments made in a calendar year. |
+        | years             | is the number of years.                            |
+        | payment           | is the amount of the payment each period.          |
+        |-------------------+----------------------------------------------------|
     2. Define an array to capture the schedule.
        #+NAME: define-schedule-array
        #+BEGIN_SRC js
@@ -1304,7 +1197,7 @@ content: "*** "
          }
        #+END_SRC
     6. Finally, the sections are combined into a function.
-       #+NAME: compute-schedule-function
+       #+NAME: compute-schedule
        #+BEGIN_SRC js :noweb yes
          function <<define-compute-schedule>> {
              <<define-schedule-array>>
@@ -1316,71 +1209,37 @@ content: "*** "
              return schedule;
          }
        #+END_SRC
-*** Test								   
-    #+NAME: run-compute-schedule
-    #+BEGIN_SRC js :exports results :results output :noweb yes :var loan_amount=10000 interest_rate=4.5 payments_per_year=12 years=3 payment=297.47
-      <<compute-schedule-function>>
 
-      console.log('loan_amount: ' + loan_amount);
-      console.log('interest_rate: ' + interest_rate);
-      console.log('payments_per_year: ' + payments_per_year);
-      console.log('years: ' + years);
-      console.log('payment: ' + payment);
-      console.log( JSON.stringify(
-          compute_schedule(loan_amount, interest_rate, payments_per_year, years, payment), 0, 4
-      ))
-    #+END_SRC
+** Anonymous (Startup)
+#+NAME: startup
+#+BEGIN_SRC js :noweb yes
+  (function() {
 
-    #+RESULTS: run-compute-schedule
-    : loan_amount: 10000
-    : interest_rate: 4.5
-    : payments_per_year: 12
-    : years: 3
-    : payment: 297.47
-    : [[0,"259.97","37.50","10000.00"],[1,"260.94","36.53","9740.03"],[2,"261.92","35.55","9479.09"],[3,"262.91","34.56","9217.16"],[4,"263.89","33.58","8954.26"],[5,"264.88","32.59","8690.36"],[6,"265.87","31.60","8425.48"],[7,"266.87","30.60","8159.61"],[8,"267.87","29.60","7892.74"],[9,"268.88","28.59","7624.87"],[10,"269.89","27.58","7355.99"],[11,"270.90","26.57","7086.10"],[12,"271.91","25.56","6815.21"],[13,"272.93","24.54","6543.29"],[14,"273.96","23.51","6270.36"],[15,"274.98","22.49","5996.40"],[16,"276.01","21.46","5721.42"],[17,"277.05","20.42","5445.41"],[18,"278.09","19.38","5168.36"],[19,"279.13","18.34","4890.27"],[20,"280.18","17.29","4611.14"],[21,"281.23","16.24","4330.96"],[22,"282.28","15.19","4049.73"],[23,"283.34","14.13","3767.45"],[24,"284.40","13.07","3484.10"],[25,"285.47","12.00","3199.70"],[26,"286.54","10.93","2914.23"],[27,"287.62","9.85","2627.69"],[28,"288.69","8.78","2340.07"],[29,"289.78","7.69","2051.38"],[30,"290.86","6.61","1761.60"],[31,"291.95","5.52","1470.73"],[32,"293.05","4.42","1178.78"],[33,"294.15","3.32","885.73"],[34,"295.25","2.22","591.58"],[35,"296.36","1.11","296.33"],[36,"297.47","-0.00","-0.03"]]
+      <<pmt>>
+      <<compute-schedule>>
 
-** Read Inputs
-   This function uses jQuery to query the HTML inputs and read their values.
-#+BEGIN_SRC js
-  funciton readInput() {
-      var inputs = {
-          loanAmount: parseFloat(oo $('#loan_amount').val() );
-          interestRate: parseFloat( $('#interest_rate').val() );
-          paymentsPerYear: parseInt( $('#payments_per_year').val() );
-          Years: parseInt( $('#years').val() );
-      };
-
-      return inputs;
-  }
-#+END_SRC
-** Compute Payment and Schedule
-   This function call read inputs and passes the data to calculate payment and calculate schedule.
-#+BEGIN_SRC js
+      
       function getDataSet() { 
+          var loan_amount = parseFloat( $('#loan_amount').val() );
+          var interest_rate = parseFloat( $('#interest_rate').val() );
+          var payments_per_year = parseInt( $('#payments_per_year').val() );
+          var years = parseInt( $('#years').val() );
+          
+          var payment = pmt(interest_rate/100/payments_per_year, payments_per_year * years, -loan_amount);
           
           $('#payment_amount').text('$' + payment.toFixed(2));
-
+          
           return compute_schedule(loan_amount,
                                   interest_rate,
                                   payments_per_year,
                                   years,
                                   payment);
       }
-#+END_SRC
-** Draw Table
-   This function 
-** Anonymous (Startup)
-#+NAME: loan-calculator-js
-#+BEGIN_SRC js :noweb yes
-  (function() {
-
-      <<amortize-js>>
-
-
+      
       function reloadTable() {
-          $('#demo').empty();
-          $('#demo').html( '<table cellpadding="0" cellspacing="0" border="0" class="display table" id="example"></table>' );
-          $('#example').dataTable( {
+          $('#schedule').empty();
+          $('#schedule').html( '<table cellpadding="0" cellspacing="0" border="0" class="display table" id="schedule_table"></table>' );
+          $('#schedule_table').dataTable( {
               "data": getDataSet(),
               "columns": [
                   { "title": "Period" },
@@ -1394,18 +1253,59 @@ content: "*** "
               "info":     false
           } );   
       }
-
+      
       $(document).ready(function() {
           reloadTable();
-
+          
           $(document).on('keyup', '.user-input', function(e) {
               reloadTable();
           });
       });
 
+
   })();
 #+END_SRC
+* Test Source Code					      :code:noexport:
+** Compute Schedule								   
+  #+NAME: run-compute-schedule
+  #+BEGIN_SRC js :exports results :results output :noweb yes :var loan_amount=10000 interest_rate=4.5 payments_per_year=12 years=3 payment=297.47
+    <<compute-schedule-function>>
 
+    console.log('loan_amount: ' + loan_amount);
+    console.log('interest_rate: ' + interest_rate);
+    console.log('payments_per_year: ' + payments_per_year);
+    console.log('years: ' + years);
+    console.log('payment: ' + payment);
+    console.log( JSON.stringify(
+	compute_schedule(loan_amount, interest_rate, payments_per_year, years, payment), 0, 4
+    ))
+  #+END_SRC
+
+  #+RESULTS: run-compute-schedule
+  : loan_amount: 10000
+  : interest_rate: 4.5
+  : payments_per_year: 12
+  : years: 3
+  : payment: 297.47
+  : [[0,"259.97","37.50","10000.00"],[1,"260.94","36.53","9740.03"],[2,"261.92","35.55","9479.09"],[3,"262.91","34.56","9217.16"],[4,"263.89","33.58","8954.26"],[5,"264.88","32.59","8690.36"],[6,"265.87","31.60","8425.48"],[7,"266.87","30.60","8159.61"],[8,"267.87","29.60","7892.74"],[9,"268.88","28.59","7624.87"],[10,"269.89","27.58","7355.99"],[11,"270.90","26.57","7086.10"],[12,"271.91","25.56","6815.21"],[13,"272.93","24.54","6543.29"],[14,"273.96","23.51","6270.36"],[15,"274.98","22.49","5996.40"],[16,"276.01","21.46","5721.42"],[17,"277.05","20.42","5445.41"],[18,"278.09","19.38","5168.36"],[19,"279.13","18.34","4890.27"],[20,"280.18","17.29","4611.14"],[21,"281.23","16.24","4330.96"],[22,"282.28","15.19","4049.73"],[23,"283.34","14.13","3767.45"],[24,"284.40","13.07","3484.10"],[25,"285.47","12.00","3199.70"],[26,"286.54","10.93","2914.23"],[27,"287.62","9.85","2627.69"],[28,"288.69","8.78","2340.07"],[29,"289.78","7.69","2051.38"],[30,"290.86","6.61","1761.60"],[31,"291.95","5.52","1470.73"],[32,"293.05","4.42","1178.78"],[33,"294.15","3.32","885.73"],[34,"295.25","2.22","591.58"],[35,"296.36","1.11","296.33"],[36,"297.47","-0.00","-0.03"]]
+
+** Should be 297.47
+
+  #+NAME: run-pmt
+  #+BEGIN_SRC js :exports results :noweb yes :var interest_rate=4.5 payments_per_year=12 years=3 loan_amount=10000
+    <<pmt-function>>
+    return pmt(interest_rate/100/payments_per_year, payments_per_year * years, -loan_amount).toFixed(2);
+  #+END_SRC
+
+  #+RESULTS: run-pmt
+  : 297.47
+
+** Should be 2245.22
+
+   #+CALL: run-pmt(interest_rate=3.5, payments_per_year=12, years=30, loan_amount=500000)
+
+   #+RESULTS:
+   : 2245.22
 * How does this work?					      :info:noexport:
 
   Loan calculator is an [[http://www.org-mode.org][org-mode]] file that includes JavaScript functions to calculate loan payments and amortization schedules.
