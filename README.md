@@ -1,4 +1,6 @@
 loan-calculator
 ===============
 
-A simple loan calculator running in a web-page; authored in org-mode
+A (http://petermoresi.github.io/loan-calculator/loan-calculator.html)[simple loan calculator] for the browser; authored in org-mode.
+
+The webpage can be accessed from 
