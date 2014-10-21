@@ -289,7 +289,7 @@ content: "*** "
 	clear:both;
 	margin-left:auto;
 	margin-right:auto;
-	padding:0.7em;
+padding:0.7em;
     /* border:1px solid #CCC; */
     /* border-radius:10px; */
     /* -moz-border-radius:10px; */
@@ -1103,12 +1103,8 @@ content: "*** "
   The source code is written JavaScript; and depends on [[https://github.com/petermoresi/amortize-js][amortize.js]].
 
 #+NAME: startup
-#+BEGIN_SRC js :noweb yes
+#+BEGIN_SRC js
   (function() {
-
-      <<pmt>>
-      <<compute-schedule>>
-
       
       function getDataSet() { 
           var loan_amount = parseFloat( $('#loan_amount').val() );
