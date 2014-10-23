@@ -1,5 +1,5 @@
 
-(function() {
+//(function() {
     
     function getDataSet() { 
         var output = {};
@@ -46,6 +46,7 @@
 
     function reloadGraph(ds) {
         var graphWidth = $('.table').width() // make graph same width as table
+        var graphHeight = $('#graph').height();
         var periodWidth = graphWidth / (ds.numberOfPayments);
         $('#graph').empty();
         $('#graph').width(graphWidth);
@@ -55,7 +56,7 @@
             var p = ds.schedule[count][2];
             var t = i + p;
             var ratio = i / t;
-            var height = $('#graph').height() * ratio;
+            var height = graphHeight * ratio;
             $('<div style="background-color: yellow; height: ' + height + 'px; width: ' + periodWidth + 'px"></div>').appendTo('#graph');
         }
     }
@@ -75,4 +76,4 @@
         reload();
     });
 
-})();
+//})();

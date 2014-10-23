@@ -2,7 +2,7 @@
 #+TITLE: Loan Calculator
 #+AUTHOR: Peter Moresi
 #+DATE: <2014-09-26 Fri>
-#+OPTIONS: ^:nil
+#+OPTIONS: ^:nil num:nil toc:nil
 
 #+HTML: <a href="https://github.com/petermoresi/loan-calculator"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
 #+HTML: <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
@@ -41,6 +41,7 @@
       </div>
       <div class="col-sm-6">
         <div id="paymentAmount"></div>
+        <a href="#schedule">Schedule</a>
       </div>
    </div>
   
@@ -54,7 +55,7 @@
   <div id="graph"></div>
 #+END_HTML
 * Schedule
-
+#+HTMl: <a name="schedule" />
 #+BEGIN_HTML
   <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
@@ -183,6 +184,7 @@
 #+BEGIN_SRC js
   function reloadGraph(ds) {
       var graphWidth = $('.table').width() // make graph same width as table
+      var graphHeight = $('#graph').height();
       var periodWidth = graphWidth / (ds.numberOfPayments);
       $('#graph').empty();
       $('#graph').width(graphWidth);
@@ -192,7 +194,7 @@
           var p = ds.schedule[count][2];
           var t = i + p;
           var ratio = i / t;
-          var height = $('#graph').height() * ratio;
+          var height = graphHeight * ratio;
           $('<div style="background-color: yellow; height: ' + height + 'px; width: ' + periodWidth + 'px"></div>').appendTo('#graph');
       }
   }
@@ -221,7 +223,7 @@
 #+END_SRC
 *** Complete Script
 #+BEGIN_SRC js :tangle loan-calculator.js :noweb yes
-  (function() {
+  //(function() {
       
       <<getDataSet>>
 
@@ -233,7 +235,7 @@
       
       <<handlePageReady>>
 
-  })();
+  //})();
 #+END_SRC
 * About the author					      :info:noexport:
   Hi, my name is Peter Moresi. I live in Southern California and work at a computer programmer at a local financial company.
