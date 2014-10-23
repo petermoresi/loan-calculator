@@ -4,8 +4,6 @@
 #+DATE: <2014-09-26 Fri>
 #+OPTIONS: ^:nil
 
-A simple loan calculator.
-
 #+HTML: <a href="https://github.com/petermoresi/loan-calculator"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
 #+HTML: <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
 
@@ -1025,101 +1023,158 @@ A simple loan calculator.
   <script src="http://cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script>
   <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
   <script type="text/javascript" src="http://petermoresi.github.io/amortize-js/amortize.js"></script>
-  <script type="text/javascript" stc="http://petermoresi.github.io/loan-calculator/loan-calculator.js></script>
+  <script type="text/javascript" src="http://petermoresi.github.io/loan-calculator/loan-calculator.js"></script>
 #+END_HTML
 
+* About this file 					      :info:noexport:
 
+  The programming example demonstrates [[http://orgmode.org/worg/org-contrib/babel/intro.html][literate programming]] with [[http://www.org-mode.org][org-mode]].
+
+  The file loan-calculator.html is generate by exporting this file.
+
+  The file loan-calculator.js is generate by extracting the source code from this document into an executable form.
+
+** How do I use this to change the program? 		      :info:noexport:
+*** Export HTML
+
+   The org-mode file can be used to generate a [[loan-calculator.html][web page]] with a simple loan calculator; as a literate program.
+
+   1. Run the 'org-export-dispatch' function with:
+      #+BEGIN_EXAMPLE
+        M-x org-mode-dispatch
+      #+END_EXAMPLE
+
+      "M-x" usually means pressing the 'ALT' and 'x' key at the same time.
+
+   2. Alteratively, use the keyboard shortcut:
+
+       #+BEGIN_EXAMPLE
+         C-c C-e h o
+       #+END_EXAMPLE
+
+   First, press 'CTRL' and 'c' at the same time; followed by 'CTRL' and 'e'. This will cause the export menu to appear. Typing 'h' followed by 'o' will export the file to HTML and open your default browser.
+
+*** Export JavaScript
+    
+    1. Run the emacs command.
+       #+BEGIN_EXAMPLE
+       M-x org-babel-tangle
+       #+END_EXAMPLE
+
+    2. Use the keyboard shortcut.
+       #+BEGIN_EXAMPLE
+       C-c C-v t
+       #+END_EXAMPLE
 * Source Code						      :code:noexport:
 
   The source code is written JavaScript; and depends on [[https://github.com/petermoresi/amortize-js][amortize.js]].
 
-** Wrapper Function
+   This function reads the values from the HTML inputs and returns a JSObject with:
+   
+   The application includes the following inputs:
+   #+inputs:
+   - loan_amount
+   - interest_rate
+   - payments_per_year
+   - years
+*** Functions
+**** Get Data Set
+     The 'getDataSet' function reads the inputs and returns a JSObject with:
+
+     #+outputs
+     - loan_amount:float
+     - interest_rate:float
+     - payments_per_year:int
+     - years:int
+     - payment:float
+     - schedule:2DArray
+     
+#+NAME: getDataSet
+#+BEGIN_SRC js
+  function getDataSet() { 
+      var output = {};
+      output.loan_amount = parseFloat( $('#loan_amount').val() );
+      output.interest_rate = parseFloat( $('#interest_rate').val() );
+      output.payments_per_year = parseInt( $('#payments_per_year').val() );
+      output.years = parseInt( $('#years').val() );
+      
+      output.payment = pmt(interest_rate/100/payments_per_year, payments_per_year * years, -loan_amount);
+      
+      output.schedule = compute_schedule( output.loan_amount,
+                                          output.interest_rate,
+                                          output.payments_per_year,
+                                          output.years,
+                                          output.payment );
+
+      return output;
+  }
+
+#+END_SRC
+**** Reload Table
+     The 'reloadTable' function clears the existing table and passes the data to [[http://datatables.net][datatables.net]].
+#+NAME: reloadTable
+#+BEGIN_SRC js
+  function reloadTable(ds) {
+      $('#schedule').empty();
+      $('#schedule').html( '<table cellpadding="0" cellspacing="0" border="0" class="display table" id="schedule_table"></table>' );
+      $('#schedule_table').dataTable( {
+          "data": ds.schedule,
+          "searching": false,
+          "columns": [
+              { "title": "Period" },
+              { "title": "Principle" },
+              { "title": "Interest" },
+              { "title": "Remaining" }
+          ],
+          "search": false,
+          "paging":   false,
+          "ordering": false,
+          "info":     false
+      } );   
+  }
+#+END_SRC
+**** Reload Graph
+     The 'reloadGraph' function manages a set of divs that show the ratio of interest to principle over time.
+#+NAME: reloadGraph
+#+BEGIN_SRC js
+  function reloadGraph(dataSet) {
+      
+  }
+#+END_SRC
+**** Handle Key Press
+#+NAME: handleKeyPress
+#+BEGIN_SRC js
+  $(document).on('keyup', '.user-input', function(e) {
+      var ds = getDataSet();
+
+      $('#payment_amount').text('$' + payment.toFixed(2));
+      reloadTable(ds);
+      reloadGraph(ds);
+  });
+#+END_SRC
+**** Handle Page Ready
+#+NAME: handlePageReady
+#+BEGIN_SRC js
+  $(document).ready(function() {
+      reloadTable();
+  });
+#+END_SRC
+**** Wrapper Function
 #+BEGIN_SRC js :tangle loan-calculator.js
   (function() {
       
-      function getDataSet() { 
-          var loan_amount = parseFloat( $('#loan_amount').val() );
-          var interest_rate = parseFloat( $('#interest_rate').val() );
-          var payments_per_year = parseInt( $('#payments_per_year').val() );
-          var years = parseInt( $('#years').val() );
-          
-          var payment = pmt(interest_rate/100/payments_per_year, payments_per_year * years, -loan_amount);
-          
-          $('#payment_amount').text('$' + payment.toFixed(2));
-          
-          return compute_schedule(loan_amount,
-                                  interest_rate,
-                                  payments_per_year,
-                                  years,
-                                  payment);
-      }
-  
+      <<getDataSet>>
 
-      function reloadGraph(dataSet) {
+      <<reloadTable>>
+
+      <<reloadGraph>>
           
-      }
+      <<handleKeyPress>>
       
-      function reloadTable(dataSet) {
-          $('#schedule').empty();
-          $('#schedule').html( '<table cellpadding="0" cellspacing="0" border="0" class="display table" id="schedule_table"></table>' );
-          $('#schedule_table').dataTable( {
-              "data": dataSet),
-              "searching": false,
-              "columns": [
-                  { "title": "Period" },
-                  { "title": "Principle" },
-                  { "title": "Interest" },
-                  { "title": "Remaining" }
-              ],
-              "search": false,
-              "paging":   false,
-              "ordering": false,
-              "info":     false
-          } );   
-      }
-      
-      $(document).ready(function() {
-          reloadTable();
-          
-          $(document).on('keyup', '.user-input', function(e) {
-              var ds = getDataSet();
-              reloadTable(ds);
-              reloadGraph(ds);
-          });
-      });
-  
-  
+      <<handlePageReady>>
+
   })();
 #+END_SRC
-* How does this work?					      :info:noexport:
-
-  Loan calculator is an [[http://www.org-mode.org][org-mode]] file that includes JavaScript functions to calculate loan payments and amortization schedules.
-
-  The org-mode file can be used to generate a [[loan-calculator.html][web page]] with a simple loan calculator; as a literate program.
-
-  You can be done in one of two ways:
-
-  1. You can run the 'org-export-dispatch' function with:
-  #+BEGIN_EXAMPLE
-  M-x org-mode-dispatch
-  #+END_EXAMPLE
-
-  The "M-x" key means press the 'ALT' and 'x' key at the same time.
-
-  Alteratively you can use the keyboard shortcut:
-
-  #+BEGIN_EXAMPLE
-  C-c C-e h o
-  #+END_EXAMPLE
-
-  First, press 'CTRL' and 'c' at the same time; followed by 'CTRL' and 'e'. This will cause the export menu to appear. Typing 'h' followed by 'o' will export the file to HTML and open your default browser.
-* About this program					      :info:noexport:
-
-  The programming example in this paper is trivial but effectively demonstrates the [[http://orgmode.org/worg/org-contrib/babel/intro.html][literate programming features]].
-
-  This is the generated documentation for a [[./amortize.js][literate program]] authored in [[http://www.org-mode.org][org-mode]].
-
-  The webpage uses [[https://github.com/fniessen/org-html-themes][org-html-themes]] for updating the look and feel.
   
 * About the author					      :info:noexport:
   Hi, my name is Peter Moresi. I live in Southern California and work at a computer programmer at a local financial company.
