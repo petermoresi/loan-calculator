@@ -1159,8 +1159,8 @@
       reloadTable();
   });
 #+END_SRC
-**** Wrapper Function
-#+BEGIN_SRC js :tangle loan-calculator.js
+*** Complete Script
+#+BEGIN_SRC js :tangle loan-calculator.js :noweb yes
   (function() {
       
       <<getDataSet>>
@@ -1175,7 +1175,6 @@
 
   })();
 #+END_SRC
-  
 * About the author					      :info:noexport:
   Hi, my name is Peter Moresi. I live in Southern California and work at a computer programmer at a local financial company.
 
