@@ -46,7 +46,7 @@
     function reload() {
         var ds = getDataSet();
     
-        $('#payment_amount').text('$' + payment.toFixed(2));
+        $('#payment_amount').text('$' + ds.payment.toFixed(2));
         reloadTable(ds);
         reloadGraph(ds);
     }
