@@ -1098,7 +1098,7 @@
       var payments_per_year = output.payments_per_year = parseInt( $('#payments_per_year').val() );
       var years = output.years = parseInt( $('#years').val() );
       
-      output.payment = pmt(interest_rate/100/payments_per_year, payments_per_year * years, -loan_amount);
+      var payment = output.payment = pmt(interest_rate/100/payments_per_year, payments_per_year * years, -loan_amount);
       
       output.schedule = compute_schedule( loan_amount,
                                           interest_rate,
