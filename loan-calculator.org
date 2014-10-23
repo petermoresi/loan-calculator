@@ -1093,18 +1093,18 @@
 #+BEGIN_SRC js
   function getDataSet() { 
       var output = {};
-      output.loan_amount = parseFloat( $('#loan_amount').val() );
-      output.interest_rate = parseFloat( $('#interest_rate').val() );
-      output.payments_per_year = parseInt( $('#payments_per_year').val() );
-      output.years = parseInt( $('#years').val() );
+      var loan_amount = output.loan_amount = parseFloat( $('#loan_amount').val() );
+      var interest_rate = output.interest_rate = parseFloat( $('#interest_rate').val() );
+      var payments_per_year = output.payments_per_year = parseInt( $('#payments_per_year').val() );
+      var years = output.years = parseInt( $('#years').val() );
       
       output.payment = pmt(interest_rate/100/payments_per_year, payments_per_year * years, -loan_amount);
       
-      output.schedule = compute_schedule( output.loan_amount,
-                                          output.interest_rate,
-                                          output.payments_per_year,
-                                          output.years,
-                                          output.payment );
+      output.schedule = compute_schedule( loan_amount,
+                                          interest_rate,
+                                          payments_per_year,
+                                          years,
+                                          payment );
 
       return output;
   }
