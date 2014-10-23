@@ -3,28 +3,33 @@
     
     function getDataSet() { 
         var output = {};
-        var loan_amount = output.loan_amount = parseFloat( $('#loan_amount').val() );
-        var interest_rate = output.interest_rate = parseFloat( $('#interest_rate').val() );
-        var payments_per_year = output.payments_per_year = parseInt( $('#payments_per_year').val() );
+        var loanAmount = output.loanAmount = parseFloat( $('#loanAmount').val() );
+        var interestRate = output.interestRate = parseFloat( $('#interestRate').val() );
+        var paymentsPerYear = output.paymentsPerYear = parseInt( $('#paymentsPerYear').val() );
         var years = output.years = parseInt( $('#years').val() );
+        var numberOfPayments = output.numberOfPayments = paymentsPerYear * years;
         
-        var payment = output.payment = pmt(interest_rate/100/payments_per_year, payments_per_year * years, -loan_amount);
+        var payment = output.payment = pmt(interestRate/100/paymentsPerYear, numberOfPayments, -loanAmount);
         
-        output.schedule = compute_schedule( loan_amount,
-                                            interest_rate,
-                                            payments_per_year,
-                                            years,
-                                            payment );
-    
+        output.schedule = computeSchedule( loanAmount,
+                                           interestRate,
+                                           paymentsPerYear,
+                                           years,
+                                           payment );
         return output;
     }
     
 
     function reloadTable(ds) {
+        // map the schedule to 2 digits after decimal point.
+        var schedule = ds.schedule.map( function(n) { 
+            return [n[0], n[1].toFixed(2), n[2].toFixed(2), n[3].toFixed(2)];
+        });
+    
         $('#schedule').empty();
         $('#schedule').html( '<table cellpadding="0" cellspacing="0" border="0" class="display table" id="schedule_table"></table>' );
         $('#schedule_table').dataTable( {
-            "data": ds.schedule,
+            "data": schedule,
             "searching": false,
             "columns": [
                 { "title": "Period" },
@@ -39,14 +44,26 @@
         } );   
     }
 
-    function reloadGraph(dataSet) {
-        
+    function reloadGraph(ds) {
+        var graphWidth = $('.table').width() // make graph same width as table
+        var periodWidth = graphWidth / (ds.numberOfPayments);
+        $('#graph').empty();
+        $('#graph').width(graphWidth);
+    
+        for (var count = 0; count < ds.numberOfPayments; count++) {
+            var i = ds.schedule[count][1];
+            var p = ds.schedule[count][2];
+            var t = i + p;
+            var ratio = i / t;
+            var height = $('#graph').height() * ratio;
+            $('<div style="background-color: yellow; height: ' + height + 'px; width: ' + periodWidth + 'px"></div>').appendTo('#graph');
+        }
     }
         
     function reload() {
         var ds = getDataSet();
     
-        $('#payment_amount').text('$' + ds.payment.toFixed(2));
+        $('#paymentAmount').text('$' + ds.payment.toFixed(2));
         reloadTable(ds);
         reloadGraph(ds);
     }
