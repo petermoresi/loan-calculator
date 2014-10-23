@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Loan Calculator</title>
-<!-- 2014-10-21 Tue 08:10 -->
+<!-- 2014-10-22 Wed 21:29 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="Peter Moresi" />
@@ -178,12 +178,20 @@ A simple loan calculator.
     </div>
  </div>
 
+<div id="graph"></div>
+
 <div id="schedule"></div>
 <style>
 @import url(http://fonts.googleapis.com/css?family=Droid+Sans|Droid+Sans+Mono|Droid+Serif);
 
 @media all
 {
+    #graph {
+       width: 600px;
+       height: 300px;
+       background: blue;
+    }
+
     html {
         margin: 0;
         font: 300 .9em/1.6em "Droid Serif", Cambria, Georgia, "DejaVu Serif", serif;
@@ -287,7 +295,7 @@ content: "** "
 h4:before {
 content: "*** "
 }
-*/
+,*/
 
     h2 {
         font-family:sans-serif;
@@ -1147,89 +1155,13 @@ padding:0.7em;
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script src="http://cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script>
 <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-<script type="text/javascript">
-// Include https://github.com/petermoresi/amortize-js
-function pmt(rate,nper,pv) {
-    var pvif, pmt;
-
-    pvif = Math.pow( 1 + rate, nper);
-    pmt = rate / (pvif - 1) * -(pv * pvif);   
-
-    return pmt;
-};
-
-function compute_schedule(loan_amount, interest_rate, payments_per_year, years, payment) {
-    var schedule = [];
-    var remaining = loan_amount;
-    var number_of_payments = payments_per_year * years;
-
-    for (var i=0; i<=number_of_payments; i++) {
-        var interest = remaining * (interest_rate/100/payments_per_year);
-        var principle = (payment-interest);
-        var row = [i, principle.toFixed(2), interest.toFixed(2), remaining.toFixed(2)];
-        schedule.push(row);
-        remaining -= principle
-    }
-
-    return schedule;
-}
-
-</script>
-<script type="text/javascript">
-(function() {
-    
-    function getDataSet() { 
-        var loan_amount = parseFloat( $('#loan_amount').val() );
-        var interest_rate = parseFloat( $('#interest_rate').val() );
-        var payments_per_year = parseInt( $('#payments_per_year').val() );
-        var years = parseInt( $('#years').val() );
-        
-        var payment = pmt(interest_rate/100/payments_per_year, payments_per_year * years, -loan_amount);
-        
-        $('#payment_amount').text('$' + payment.toFixed(2));
-        
-        return compute_schedule(loan_amount,
-                                interest_rate,
-                                payments_per_year,
-                                years,
-                                payment);
-    }
-    
-    function reloadTable() {
-        $('#schedule').empty();
-        $('#schedule').html( '<table cellpadding="0" cellspacing="0" border="0" class="display table" id="schedule_table"></table>' );
-        $('#schedule_table').dataTable( {
-            "data": getDataSet(),
-            "searching": false,
-            "columns": [
-                { "title": "Period" },
-                { "title": "Principle" },
-                { "title": "Interest" },
-                { "title": "Remaining" }
-            ],
-            "search": false,
-            "paging":   false,
-            "ordering": false,
-            "info":     false
-        } );   
-    }
-    
-    $(document).ready(function() {
-        reloadTable();
-        
-        $(document).on('keyup', '.user-input', function(e) {
-            reloadTable();
-        });
-    });
-
-
-})();
-</script>
+<script type="text/javascript" src="http://petermoresi.github.io/amortize-js/amortize.js"></script>
+<script type="text/javascript" stc="http://petermoresi.github.io/loan-calculator/loan-calculator.js></script>
 </div>
 <div id="postamble" class="status">
 <p class="date">Date: 2014-09-26</p>
 <p class="author">Author: Peter Moresi</p>
-<p class="date">Created: 2014-10-21 Tue 08:10</p>
+<p class="date">Created: 2014-10-22 Wed 21:29</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.3.1 (<a href="http://orgmode.org">Org</a> mode 8.2.7c)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
