@@ -1144,19 +1144,22 @@
 **** Handle Key Press
 #+NAME: handleKeyPress
 #+BEGIN_SRC js
-  $(document).on('keyup', '.user-input', function(e) {
+  function reload() {
       var ds = getDataSet();
 
       $('#payment_amount').text('$' + payment.toFixed(2));
       reloadTable(ds);
       reloadGraph(ds);
-  });
+  }
+
+
+  $(document).on('keyup', '.user-input', reload);
 #+END_SRC
 **** Handle Page Ready
 #+NAME: handlePageReady
 #+BEGIN_SRC js
   $(document).ready(function() {
-      reloadTable();
+      reload();
   });
 #+END_SRC
 *** Complete Script

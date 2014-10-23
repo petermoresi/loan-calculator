@@ -43,16 +43,19 @@
         
     }
         
-    $(document).on('keyup', '.user-input', function(e) {
+    function reload() {
         var ds = getDataSet();
     
         $('#payment_amount').text('$' + payment.toFixed(2));
         reloadTable(ds);
         reloadGraph(ds);
-    });
+    }
+    
+    
+    $(document).on('keyup', '.user-input', reload);
     
     $(document).ready(function() {
-        reloadTable();
+        reload();
     });
 
 })();
