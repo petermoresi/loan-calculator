@@ -61,7 +61,7 @@
             var t = i + p;
             var ratio = i / t;
             var height = graphHeight * ratio;
-            $('<div style="background-color: yellow; height: ' + height + 'px; width: ' + periodWidth + 'px"></div>').appendTo('#graph');
+            $('<div style="float: left; background-color: yellow; height: ' + height + 'px; width: ' + periodWidth + 'px"></div>').appendTo('#graph');
         }
     }
         
