@@ -47,7 +47,11 @@
     function reloadGraph(ds) {
         var graphWidth = $('.table').width() // make graph same width as table
         var graphHeight = $('#graph').height();
-        var periodWidth = graphWidth / (ds.numberOfPayments);
+        var periodWidth = Math.round(graphWidth / (ds.numberOfPayments));
+    
+        // adjust graphy width for rounding of period width
+        graphWidth = periodWidth * ds.numberOfPayments;
+    
         $('#graph').empty();
         $('#graph').width(graphWidth);
     

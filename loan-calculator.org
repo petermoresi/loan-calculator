@@ -185,7 +185,11 @@
   function reloadGraph(ds) {
       var graphWidth = $('.table').width() // make graph same width as table
       var graphHeight = $('#graph').height();
-      var periodWidth = graphWidth / (ds.numberOfPayments);
+      var periodWidth = Math.round(graphWidth / (ds.numberOfPayments));
+
+      // adjust graphy width for rounding of period width
+      graphWidth = periodWidth * ds.numberOfPayments;
+
       $('#graph').empty();
       $('#graph').width(graphWidth);
 
@@ -241,3 +245,11 @@
   Hi, my name is Peter Moresi. I live in Southern California and work at a computer programmer at a local financial company.
 
   I love org-mode, emacs and linux. Although the majority of my professional experience is working with Microsoft's software.
+
+#+BEGIN_SRC js
+return Math.round(2.9)
+#+END_SRC
+
+#+RESULTS:
+: 3
+
