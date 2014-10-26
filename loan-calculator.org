@@ -28,7 +28,7 @@
         Years
       </div>
       <div class="col-sm-6">
-        <input type="text" id="years" class="user-input" value="3" />
+        <input type="text" id="years" class="user-input" value="30" />
       </div> 
      <div class="col-sm-6">
         Payments per year
@@ -49,8 +49,8 @@
   
 
 #+END_HTML
-* Principle / Interest
-  The interest payment is blue and the principle payment in yellow.
+* Payment Split (Principle / Interest)
+  The interest payment (top) is blue and the principle payment (bottom) in yellow.
 #+BEGIN_HTML
   <div id="graph"></div>
 #+END_HTML
@@ -198,8 +198,8 @@
           var p = ds.schedule[count][2];
           var t = i + p;
           var ratio = i / t;
-          var height = graphHeight * ratio;
-          $('<div style="float: left; background-color: yellow; height: ' + height + 'px; width: ' + periodWidth + 'px"></div>').appendTo('#graph');
+          var height = Math.round(graphHeight * ratio);
+          $('<div style="float: left; margin-top: ' + (graphHeight-height).toString() + 'px; background-color: yellow; height: ' + height + 'px; width: ' + periodWidth + 'px"></div>').appendTo('#graph');
       }
   }
 #+END_SRC

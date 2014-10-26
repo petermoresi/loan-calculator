@@ -60,8 +60,8 @@
             var p = ds.schedule[count][2];
             var t = i + p;
             var ratio = i / t;
-            var height = graphHeight * ratio;
-            $('<div style="float: left; background-color: yellow; height: ' + height + 'px; width: ' + periodWidth + 'px"></div>').appendTo('#graph');
+            var height = Math.round(graphHeight * ratio);
+            $('<div style="float: left; margin-top: ' + (graphHeight-height).toString() + 'px; background-color: yellow; height: ' + height + 'px; width: ' + periodWidth + 'px"></div>').appendTo('#graph');
         }
     }
         
