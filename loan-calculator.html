@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Loan Calculator</title>
-<!-- 2015-03-10 Tue 23:31 -->
+<!-- 2015-03-10 Tue 23:48 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="Peter Moresi" />
@@ -147,6 +147,16 @@ for the JavaScript code in this tag.
 <li><a href="#sec-2">User Input</a></li>
 <li><a href="#sec-3">Principle / Interest Graph</a></li>
 <li><a href="#sec-4">Schedule</a></li>
+<li><a href="#sec-5">Source Code&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></a>
+<ul>
+<li>
+<ul>
+<li><a href="#sec-5-0-1">Functions</a></li>
+<li><a href="#sec-5-0-2">Complete Script</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -175,7 +185,7 @@ program is running inside the document that you are reading now.
 </p>
 
 <p>
-The documentation and programming are contained inside a <a href="file:///loan-calculator.html">single org file</a>.
+The documentation and programming are contained inside a <a href="http://petermoresi.github.io/loan-calculator/loan-calculator.org">single org file</a>.
 </p>
 
 <p>
@@ -251,11 +261,254 @@ The interest payment (top) is blue and the principle payment (bottom) in yellow.
 <div id="schedule"></div>
 </div>
 </div>
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5">Source Code&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></h2>
+<div class="outline-text-2" id="text-5">
+<p>
+The source code is written JavaScript; and depends on <a href="http://petermoresi.github.io/amortize-js/amortize.html">amortize.js</a>.
+</p>
+
+<p>
+This function reads the values from the HTML inputs and returns a JSObject with:
+</p>
+
+<p>
+The application includes the following inputs:
+</p>
+<ul class="org-ul">
+<li>loan_amount
+</li>
+<li>interest_rate
+</li>
+<li>payments_per_year
+</li>
+<li>years
+</li>
+</ul>
+</div>
+
+<div id="outline-container-sec-5-0-1" class="outline-4">
+<h4 id="sec-5-0-1">Functions</h4>
+<div class="outline-text-4" id="text-5-0-1">
+</div><ul class="org-ul"><li><a id="sec-5-0-1-1" name="sec-5-0-1-1"></a>Get DataSet<br  /><div class="outline-text-5" id="text-5-0-1-1">
+<p>
+Reads the inputs, runs calculations and returns the dataset.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-js" id="getDataSet"><span style="color: #0000FF;">function</span> <span style="color: #006699;">getDataSet</span>() { 
+    <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">output</span> = {};
+    <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">loanAmount</span> = output.loanAmount = parseFloat( $(<span style="color: #008000;">'#loanAmount'</span>).val() );
+    <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">interestRate</span> = output.interestRate = parseFloat( $(<span style="color: #008000;">'#interestRate'</span>).val() );
+    <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">paymentsPerYear</span> = output.paymentsPerYear = parseInt( $(<span style="color: #008000;">'#paymentsPerYear'</span>).val() );
+    <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">years</span> = output.years = parseInt( $(<span style="color: #008000;">'#years'</span>).val() );
+    <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">numberOfPayments</span> = output.numberOfPayments = paymentsPerYear * years;
+
+    <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">payment</span> = output.payment = pmt(interestRate/100/paymentsPerYear, numberOfPayments, -loanAmount);
+
+    output.schedule = computeSchedule( loanAmount,
+                                       interestRate,
+                                       paymentsPerYear,
+                                       years,
+                                       payment );
+    <span style="color: #0000FF;">return</span> output;
+}
+</pre>
+</div>
+</div>
+</li>
+<li><a id="sec-5-0-1-2" name="sec-5-0-1-2"></a>Reload Table<br  /><div class="outline-text-5" id="text-5-0-1-2">
+<p>
+The 'reloadTable' function clears the schedule and reloads using <a href="http://datatables.net">datatables.net</a>.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-js" id="reloadTable"><span style="color: #0000FF;">function</span> <span style="color: #006699;">reloadTable</span>(<span style="color: #BA36A5;">ds</span>) {
+    <span style="color: #8D8D84;">// </span><span style="color: #8D8D84; font-style: italic;">map the schedule to 2 digits after decimal point.</span>
+    <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">schedule</span> = ds.schedule.map( <span style="color: #0000FF;">function</span>(<span style="color: #BA36A5;">n</span>) { 
+        <span style="color: #0000FF;">return</span> [n[0], n[1].toFixed(2), n[2].toFixed(2), n[3].toFixed(2)];
+    });
+
+    $(<span style="color: #008000;">'#schedule'</span>).empty();
+    $(<span style="color: #008000;">'#schedule'</span>).html( <span style="color: #008000;">'&lt;table cellpadding="0" cellspacing="0" border="0" class="display table" id="schedule_table"&gt;&lt;/table&gt;'</span> );
+    $(<span style="color: #008000;">'#schedule_table'</span>).dataTable( {
+        <span style="color: #008000;">"data"</span>: schedule,
+        <span style="color: #008000;">"searching"</span>: <span style="color: #D0372D;">false</span>,
+        <span style="color: #008000;">"columns"</span>: [
+            { <span style="color: #008000;">"title"</span>: <span style="color: #008000;">"Period"</span> },
+            { <span style="color: #008000;">"title"</span>: <span style="color: #008000;">"Principle"</span> },
+            { <span style="color: #008000;">"title"</span>: <span style="color: #008000;">"Interest"</span> },
+            { <span style="color: #008000;">"title"</span>: <span style="color: #008000;">"Remaining"</span> }
+        ],
+        <span style="color: #008000;">"search"</span>: <span style="color: #D0372D;">false</span>,
+        <span style="color: #008000;">"paging"</span>:   <span style="color: #D0372D;">false</span>,
+        <span style="color: #008000;">"ordering"</span>: <span style="color: #D0372D;">false</span>,
+        <span style="color: #008000;">"info"</span>:     <span style="color: #D0372D;">false</span>
+    } );   
+}
+</pre>
+</div>
+</div>
+</li>
+<li><a id="sec-5-0-1-3" name="sec-5-0-1-3"></a>Reload Graph<br  /><div class="outline-text-5" id="text-5-0-1-3">
+<p>
+The 'reloadGraph' clears the graph and reloads
+</p>
+<div class="org-src-container">
+
+<pre class="src src-js" id="reloadGraph"><span style="color: #0000FF;">function</span> <span style="color: #006699;">reloadGraph</span>(<span style="color: #BA36A5;">ds</span>) {
+    <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">graphWidth</span> = $(<span style="color: #008000;">'#outline-container-sec-2'</span>).width(); <span style="color: #8D8D84;">// </span><span style="color: #8D8D84; font-style: italic;">make graph same width as table</span>
+    <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">graphHeight</span> = $(<span style="color: #008000;">'#graph'</span>).height();
+    <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">periodWidth</span> = Math.round(graphWidth / (ds.numberOfPayments));
+
+    <span style="color: #8D8D84;">// </span><span style="color: #8D8D84; font-style: italic;">adjust graphy width for rounding of period width</span>
+    graphWidth = periodWidth * ds.numberOfPayments;
+
+    $(<span style="color: #008000;">'#graph'</span>).empty();
+    $(<span style="color: #008000;">'#graph'</span>).width(graphWidth);
+
+    <span style="color: #0000FF;">for</span> (<span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">count</span> = 0; count &lt; ds.numberOfPayments; count++) {
+        <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">i</span> = ds.schedule[count][1];
+        <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">p</span> = ds.schedule[count][2];
+        <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">t</span> = i + p;
+        <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">ratio</span> = i / t;
+        <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">height</span> = Math.round(graphHeight * ratio);
+        $(<span style="color: #008000;">'&lt;div style="float: left; margin-top: '</span> + (graphHeight-height).toString() + <span style="color: #008000;">'px; background-color: yellow; height: '</span> + height + <span style="color: #008000;">'px; width: '</span> + periodWidth + <span style="color: #008000;">'px"&gt;&lt;/div&gt;'</span>).appendTo(<span style="color: #008000;">'#graph'</span>);
+    }
+}
+</pre>
+</div>
+</div>
+</li>
+<li><a id="sec-5-0-1-4" name="sec-5-0-1-4"></a>Reload<br  /><div class="outline-text-5" id="text-5-0-1-4">
+<p>
+The 'reload' function reads the dataset and bindt the data to the HTML document.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-js" id="handleKeyPress"><span style="color: #0000FF;">function</span> <span style="color: #006699;">reload</span>() {
+    <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">ds</span> = getDataSet();
+
+    $(<span style="color: #008000;">'#paymentAmount'</span>).text(<span style="color: #008000;">'$'</span> + ds.payment.toFixed(2));
+    reloadTable(ds);
+    reloadGraph(ds);
+}
+
+
+$(document).on(<span style="color: #008000;">'keyup'</span>, <span style="color: #008000;">'.user-input'</span>, reload);
+</pre>
+</div>
+</div>
+</li>
+<li><a id="sec-5-0-1-5" name="sec-5-0-1-5"></a>Handle Page Ready<br  /><div class="outline-text-5" id="text-5-0-1-5">
+<div class="org-src-container">
+
+<pre class="src src-js" id="handlePageReady">$(document).ready(<span style="color: #0000FF;">function</span>() {
+    reload();
+});
+</pre>
+</div>
+</div>
+</li></ul>
+</div>
+<div id="outline-container-sec-5-0-2" class="outline-4">
+<h4 id="sec-5-0-2">Complete Script</h4>
+<div class="outline-text-4" id="text-5-0-2">
+<div class="org-src-container">
+
+<pre class="src src-js">(<span style="color: #0000FF;">function</span>() {
+
+    <span style="color: #0000FF;">function</span> <span style="color: #006699;">getDataSet</span>() { 
+        <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">output</span> = {};
+        <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">loanAmount</span> = output.loanAmount = parseFloat( $(<span style="color: #008000;">'#loanAmount'</span>).val() );
+        <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">interestRate</span> = output.interestRate = parseFloat( $(<span style="color: #008000;">'#interestRate'</span>).val() );
+        <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">paymentsPerYear</span> = output.paymentsPerYear = parseInt( $(<span style="color: #008000;">'#paymentsPerYear'</span>).val() );
+        <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">years</span> = output.years = parseInt( $(<span style="color: #008000;">'#years'</span>).val() );
+        <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">numberOfPayments</span> = output.numberOfPayments = paymentsPerYear * years;
+
+        <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">payment</span> = output.payment = pmt(interestRate/100/paymentsPerYear, numberOfPayments, -loanAmount);
+
+        output.schedule = computeSchedule( loanAmount,
+                                           interestRate,
+                                           paymentsPerYear,
+                                           years,
+                                           payment );
+        <span style="color: #0000FF;">return</span> output;
+    }
+
+
+    <span style="color: #0000FF;">function</span> <span style="color: #006699;">reloadTable</span>(<span style="color: #BA36A5;">ds</span>) {
+        <span style="color: #8D8D84;">// </span><span style="color: #8D8D84; font-style: italic;">map the schedule to 2 digits after decimal point.</span>
+        <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">schedule</span> = ds.schedule.map( <span style="color: #0000FF;">function</span>(<span style="color: #BA36A5;">n</span>) { 
+            <span style="color: #0000FF;">return</span> [n[0], n[1].toFixed(2), n[2].toFixed(2), n[3].toFixed(2)];
+        });
+
+        $(<span style="color: #008000;">'#schedule'</span>).empty();
+        $(<span style="color: #008000;">'#schedule'</span>).html( <span style="color: #008000;">'&lt;table cellpadding="0" cellspacing="0" border="0" class="display table" id="schedule_table"&gt;&lt;/table&gt;'</span> );
+        $(<span style="color: #008000;">'#schedule_table'</span>).dataTable( {
+            <span style="color: #008000;">"data"</span>: schedule,
+            <span style="color: #008000;">"searching"</span>: <span style="color: #D0372D;">false</span>,
+            <span style="color: #008000;">"columns"</span>: [
+                { <span style="color: #008000;">"title"</span>: <span style="color: #008000;">"Period"</span> },
+                { <span style="color: #008000;">"title"</span>: <span style="color: #008000;">"Principle"</span> },
+                { <span style="color: #008000;">"title"</span>: <span style="color: #008000;">"Interest"</span> },
+                { <span style="color: #008000;">"title"</span>: <span style="color: #008000;">"Remaining"</span> }
+            ],
+            <span style="color: #008000;">"search"</span>: <span style="color: #D0372D;">false</span>,
+            <span style="color: #008000;">"paging"</span>:   <span style="color: #D0372D;">false</span>,
+            <span style="color: #008000;">"ordering"</span>: <span style="color: #D0372D;">false</span>,
+            <span style="color: #008000;">"info"</span>:     <span style="color: #D0372D;">false</span>
+        } );   
+    }
+
+    <span style="color: #0000FF;">function</span> <span style="color: #006699;">reloadGraph</span>(<span style="color: #BA36A5;">ds</span>) {
+        <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">graphWidth</span> = $(<span style="color: #008000;">'#outline-container-sec-2'</span>).width(); <span style="color: #8D8D84;">// </span><span style="color: #8D8D84; font-style: italic;">make graph same width as table</span>
+        <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">graphHeight</span> = $(<span style="color: #008000;">'#graph'</span>).height();
+        <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">periodWidth</span> = Math.round(graphWidth / (ds.numberOfPayments));
+
+        <span style="color: #8D8D84;">// </span><span style="color: #8D8D84; font-style: italic;">adjust graphy width for rounding of period width</span>
+        graphWidth = periodWidth * ds.numberOfPayments;
+
+        $(<span style="color: #008000;">'#graph'</span>).empty();
+        $(<span style="color: #008000;">'#graph'</span>).width(graphWidth);
+
+        <span style="color: #0000FF;">for</span> (<span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">count</span> = 0; count &lt; ds.numberOfPayments; count++) {
+            <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">i</span> = ds.schedule[count][1];
+            <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">p</span> = ds.schedule[count][2];
+            <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">t</span> = i + p;
+            <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">ratio</span> = i / t;
+            <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">height</span> = Math.round(graphHeight * ratio);
+            $(<span style="color: #008000;">'&lt;div style="float: left; margin-top: '</span> + (graphHeight-height).toString() + <span style="color: #008000;">'px; background-color: yellow; height: '</span> + height + <span style="color: #008000;">'px; width: '</span> + periodWidth + <span style="color: #008000;">'px"&gt;&lt;/div&gt;'</span>).appendTo(<span style="color: #008000;">'#graph'</span>);
+        }
+    }
+
+    <span style="color: #0000FF;">function</span> <span style="color: #006699;">reload</span>() {
+        <span style="color: #0000FF;">var</span> <span style="color: #BA36A5;">ds</span> = getDataSet();
+
+        $(<span style="color: #008000;">'#paymentAmount'</span>).text(<span style="color: #008000;">'$'</span> + ds.payment.toFixed(2));
+        reloadTable(ds);
+        reloadGraph(ds);
+    }
+
+
+    $(document).on(<span style="color: #008000;">'keyup'</span>, <span style="color: #008000;">'.user-input'</span>, reload);
+
+    $(document).ready(<span style="color: #0000FF;">function</span>() {
+        reload();
+    });
+
+})();
+</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="date">Date: <span class="timestamp-wrapper"><span class="timestamp">&lt;2014-09-26 Fri&gt;</span></span></p>
 <p class="author">Author: Peter Moresi</p>
-<p class="date">Created: 2015-03-10 Tue 23:31</p>
+<p class="date">Created: 2015-03-10 Tue 23:48</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.4.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>

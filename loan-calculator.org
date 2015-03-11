@@ -95,49 +95,9 @@
 #+BEGIN_HTML
   <div id="schedule"></div>
 #+END_HTML
+* Source Code							       :code:
 
-* About this file 					      :info:noexport:
-
-  The programming example demonstrates [[http://orgmode.org/worg/org-contrib/babel/intro.html][literate programming]] with [[http://www.org-mode.org][org-mode]].
-
-  The file loan-calculator.html is generate by exporting this file.
-
-  The file loan-calculator.js is generate by extracting the source code from this document into an executable form.
-
-** How do I use this to change the program? 		      :info:noexport:
-*** Export HTML
-
-   The org-mode file can be used to generate a [[loan-calculator.html][web page]] with a simple loan calculator; as a literate program.
-
-   1. Run the 'org-export-dispatch' function with:
-      #+BEGIN_EXAMPLE
-        M-x org-mode-dispatch
-      #+END_EXAMPLE
-
-      "M-x" usually means pressing the 'ALT' and 'x' key at the same time.
-
-   2. Alteratively, use the keyboard shortcut:
-
-       #+BEGIN_EXAMPLE
-         C-c C-e h o
-       #+END_EXAMPLE
-
-   First, press 'CTRL' and 'c' at the same time; followed by 'CTRL' and 'e'. This will cause the export menu to appear. Typing 'h' followed by 'o' will export the file to HTML and open your default browser.
-
-*** Export JavaScript
-    
-    1. Run the emacs command.
-       #+BEGIN_EXAMPLE
-       M-x org-babel-tangle
-       #+END_EXAMPLE
-
-    2. Use the keyboard shortcut.
-       #+BEGIN_EXAMPLE
-       C-c C-v t
-       #+END_EXAMPLE
-* Source Code						      :code:noexport:
-
-  The source code is written JavaScript; and depends on [[https://github.com/petermoresi/amortize-js][amortize.js]].
+  The source code is written JavaScript; and depends on [[http://petermoresi.github.io/amortize-js/amortize.html][amortize.js]].
 
    This function reads the values from the HTML inputs and returns a JSObject with:
    
@@ -149,14 +109,10 @@
    - years
 
 *** Functions
-**** Get DoanAmount:float
-     - interestRate:float
-     - paymentsPerYear:int
-     - years:int
-     - payment:float
-     - numberOfPayments:int
-     - schedule:2DArray
+**** Get DataSet     
      
+     Reads the inputs, runs calculations and returns the dataset.
+
 #+NAME: getDataSet
 #+BEGIN_SRC js
   function getDataSet() { 
@@ -269,15 +225,43 @@
 
   })();
 #+END_SRC
-* About the author					      :info:noexport:
-  Hi, my name is Peter Moresi. I live in Southern California and work at a computer programmer at a local financial company.
+* About this file 					      :info:noexport:
 
-  I love org-mode, emacs and linux. Although the majority of my professional experience is working with Microsoft's software.
+  The programming example demonstrates [[http://orgmode.org/worg/org-contrib/babel/intro.html][literate programming]] with [[http://www.org-mode.org][org-mode]].
 
-#+BEGIN_SRC js
-return Math.round(2.9)
-#+END_SRC
+  The file loan-calculator.html is generate by exporting this file.
 
-#+RESULTS:
-: 3
+  The file loan-calculator.js is generate by extracting the source code from this document into an executable form.
+
+** How do I use this to change the program? 		      :info:noexport:
+*** Export HTML
+
+   The org-mode file can be used to generate a [[loan-calculator.html][web page]] with a simple loan calculator; as a literate program.
+
+   1. Run the 'org-export-dispatch' function with:
+      #+BEGIN_EXAMPLE
+        M-x org-mode-dispatch
+      #+END_EXAMPLE
+
+      "M-x" usually means pressing the 'ALT' and 'x' key at the same time.
+
+   2. Alteratively, use the keyboard shortcut:
+
+       #+BEGIN_EXAMPLE
+         C-c C-e h o
+       #+END_EXAMPLE
+
+   First, press 'CTRL' and 'c' at the same time; followed by 'CTRL' and 'e'. This will cause the export menu to appear. Typing 'h' followed by 'o' will export the file to HTML and open your default browser.
+
+*** Export JavaScript
+    
+    1. Run the emacs command.
+       #+BEGIN_EXAMPLE
+       M-x org-babel-tangle
+       #+END_EXAMPLE
+
+    2. Use the keyboard shortcut.
+       #+BEGIN_EXAMPLE
+       C-c C-v t
+       #+END_EXAMPLE
 
