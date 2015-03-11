@@ -1,5 +1,5 @@
 
-//(function() {
+(function() {
     
     function getDataSet() { 
         var output = {};
@@ -45,7 +45,7 @@
     }
 
     function reloadGraph(ds) {
-        var graphWidth = $('.table').width() // make graph same width as table
+        var graphWidth = $('#outline-container-sec-2').width(); // make graph same width as table
         var graphHeight = $('#graph').height();
         var periodWidth = Math.round(graphWidth / (ds.numberOfPayments));
     
@@ -80,4 +80,4 @@
         reload();
     });
 
-//})();
+})();
